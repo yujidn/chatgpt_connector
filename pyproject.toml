@@ -9,6 +9,8 @@ packages = [{include = "python_repository_template"}]
 [tool.poetry.dependencies]
 python = " >=3.7.1,<4.0"
 openai = "^0.27.2"
+slack-bolt = "^1.16.4"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.1.2"
