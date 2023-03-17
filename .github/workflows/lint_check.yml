@@ -1,0 +1,39 @@
+name: lint check
+on: push
+
+env:
+  PYTHON_VERSION: "3.8"
+  POETRY_VERSION: "1.4.0"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # checkout repository
+      - name: checkout
+        uses: actions/checkout@v2
+
+      # install python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # cacheがヒットする場合はインストールをスキップする
+      - name: install dependencies
+        run: |
+          pip install pre-commit
+
+      # pre-commit cache
+      - name: pre-commit cache
+        id: cached-pre-commit-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit/
+          key: pre-commit-cache-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ env.POETRY_VERSION }}-${{ hashFiles('**/.pre-commit-config.yaml') }}
+
+      # pre-commit run
+      - name: run pre-commit
+        run: |
+          pre-commit install
+          pre-commit run --all-files

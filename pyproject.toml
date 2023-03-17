@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "python-repository-template"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "python_repository_template"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.1.2"
+pre-commit = "^2.21.0"
+pytest-cov = "^4.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 108
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+)/
+'''
+
+[tool.isort]
+skip = [".gitignore", ".dockerignore"]
+line_length = 108
+multi_line_output = 3
+include_trailing_comma = true
+ensure_newline_before_comments = true
+use_parentheses = true

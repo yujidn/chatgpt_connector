@@ -1,0 +1,74 @@
+name: pytest
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        poetry-version: ["1.4.0"]
+
+    steps:
+      # checkout repository
+      - name: checkout
+        uses: actions/checkout@v2
+
+      # install python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # poetry install
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ matrix.poetry-version }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      # vertural env cache
+      - name: Cache Poetry cache
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: poetry-cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.poetry-version }}-workflow-${{ hashFiles('**/.github/workflows/pytest.yml') }}-lock-${{ hashFiles('**/poetry.lock') }}
+
+      # cacheがヒットする場合はインストールをスキップする
+      - name: install dependencies
+        run: poetry install --no-interaction
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      # pytestを実行する -> カバレッジもあわせてみる
+      - name: Test with pytest
+        run: |
+          poetry run python -m pytest -v --cov=liquid_face_anti_spoofing --cov-report=term-missing
+
+#     slack_notification:
+#       if: always()
+#       runs-on: ubuntu-latest
+#
+#       # ここで指定したjobの終了後に動くようにする(指定しなかった場合は並列に動くらしい
+#       needs: test
+#
+#       steps:
+#         # env.workflow_conclusionに前のjobの成否を入れてくれる便利なやつ
+#         - name: get previous job status
+#           uses: technote-space/workflow-conclusion-action@v1
+#
+#         # 細かい設定項目はここ参照
+#         # https://github.com/marketplace/actions/slack-notify
+#         - uses: rtCamp/action-slack-notify@v2
+#           env:
+#             #
+#             SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+#
+#             # slack postの帯の色が成功なら緑、失敗なら赤になる
+#             SLACK_COLOR: ${{ env.WORKFLOW_CONCLUSION }}
+#
+#             SLACK_USERNAME: GitHub Actions Result
+#             SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/Octocat.png
+#
+#             SLACK_TITLE: Repository
+#             SLACK_MESSAGE: ${{ github.repository }}

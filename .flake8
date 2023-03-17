@@ -1,0 +1,13 @@
+[flake8]
+ignore =
+    # スライスの:の前後にスペースがある場合は警告するもの.
+    # blackではスライスの場合は" : "という感じで前後にスペースを入れるため、無効化が必要
+    E203,
+    # module level import not at top of file
+    E402,
+    # line too long (>79)
+    E501,
+    # Line break occurred after a binary operator
+    # follow pep8
+    W503
+max-line-length = 108
