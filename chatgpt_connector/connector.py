@@ -1,7 +1,5 @@
 import os
 import openai
-import json
-import time
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -10,7 +8,7 @@ def send_message(text:str, model="gpt-3.5-turbo") -> openai.openai_object.OpenAI
     response = openai.ChatCompletion.create(
         model=model,
         messages=[
-            {"role": "system", "content": "回答は韻を踏んでラップ調で回答してください。"},
+            {"role": "system", "content": "質問が来た場合は質問への回答をしてください。チャットが来た場合はチャットへの返答をしてください。回答はmarkdown形式で記載してください。"},
             {"role": "user", "content": text}
         ]
     )
