@@ -1,9 +1,12 @@
 import os
+
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+
 from chatgpt_connector import connector
 
 app = App(token=os.getenv("SLACK_BOT_TOKEN"))
+
 
 @app.event("app_mention")
 def handle_mention(event, say):
@@ -14,7 +17,7 @@ def handle_mention(event, say):
         response = connector.send_message(text)
         response_text = connector.response_to_text(response)
         print(response_text)
-        say(f'<@{user_id}> {response_text}')
+        say(f"<@{user_id}> {response_text}")
     except Exception as e:
         say(f"なんかエラーだって {e}")
 
