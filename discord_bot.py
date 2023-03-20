@@ -1,4 +1,5 @@
 import os
+import re
 
 import discord
 from discord.ext import commands
@@ -8,6 +9,13 @@ from chatgpt_connector import connector
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=">", intents=intents)
+
+
+def remove_mention(message: str) -> str:
+    m = re.match("<.*>", message)
+    if m is not None:
+        return message[m.span()[1] :]
+    return message
 
 
 @bot.event
@@ -31,20 +39,22 @@ async def on_message(message: discord.message.Message):
                 "content": "最新のメッセージ以外は会話の履歴です。roleがuserのものはユーザーが発したもので、roleがassistantのものは、chatgptからの返答になっています。会話履歴を踏まえたうえで、最新のメッセージに回答してください。",
             }
         ]
-        history_prompt.append({"role": "user", "content": message.content})
+        history_prompt.append({"role": "user", "content": remove_mention(message.content)})
         async for msg in message.channel.history(limit=5, before=message):
             if msg.content:
                 # bot 以外のユーザーのメッセージのみリストに追加する
+                content = remove_mention(msg.content)
                 if "chatgpt" in msg.author.name:
-                    history_prompt.append({"role": "assistant", "content": msg.content})
+                    history_prompt.append({"role": "assistant", "content": content})
                 else:
-                    history_prompt.append({"role": "user", "content": msg.content})
+                    history_prompt.append({"role": "user", "content": content})
 
         history_prompt.reverse()
 
         message_list = system_prompt + history_prompt
         # import json
         # print(json.dumps(message_list, indent=2, ensure_ascii=False))
+        print("message received")
 
         try:
             response = connector.send_messages(message_list)
