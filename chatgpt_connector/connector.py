@@ -18,7 +18,7 @@ def send_text(text: str, model="gpt-3.5-turbo") -> openai.openai_object.OpenAIOb
 
 
 def send_messages(
-    messages: typing.List[dict], *, model="gpt-3.5-turbo"
+    messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024
 ) -> openai.openai_object.OpenAIObject:
     """
     {"role": <role>, "content": <text>},
@@ -38,8 +38,8 @@ def response_to_text(response: openai.openai_object.OpenAIObject) -> str:
     jpy_cost = usd_cost * usd_to_jpg
 
     text = response["choices"][0]["message"]["content"] + "\n"
-    cost_text = f"ちなみに、このテキストを作るのに{token_cost}トークン使用し、{jpy_cost}円かかりました。({usd_to_jpg}yen/usd換算)" + "\n"
+    # cost_text = f"ちなみに、このテキストを作るのに{token_cost}トークン使用し、{jpy_cost}円かかりました。({usd_to_jpg}yen/usd換算)" + "\n"
     # text += cost_text
-    cost_text
+    print(f"token:{token_cost} jpy:{jpy_cost}")
 
     return text
