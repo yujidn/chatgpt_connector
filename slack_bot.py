@@ -43,7 +43,7 @@ def handle_mention(event, say):
     print(thread_message)
 
     try:
-        response = connector.send_message(thread_message)
+        response = connector.send_text(thread_message)
         response_text = connector.response_to_text(response)
         print(response_text)
         # スレッドで返信する
