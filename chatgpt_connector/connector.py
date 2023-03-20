@@ -26,6 +26,7 @@ def send_messages(
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
+        max_tokens=max_tokens
     )
 
     return response
