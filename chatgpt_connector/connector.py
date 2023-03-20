@@ -1,7 +1,7 @@
 import os
+import typing
 
 import openai
-import typing
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -16,9 +16,12 @@ def send_text(text: str, model="gpt-3.5-turbo") -> openai.openai_object.OpenAIOb
 
     return response
 
-def send_messages(messages:typing.List[dict], *, model="gpt-3.5-turbo") -> openai.openai_object.OpenAIObject:
+
+def send_messages(
+    messages: typing.List[dict], *, model="gpt-3.5-turbo"
+) -> openai.openai_object.OpenAIObject:
     """
-        {"role": <role>, "content": <text>},
+    {"role": <role>, "content": <text>},
     """
     response = openai.ChatCompletion.create(
         model=model,
@@ -35,6 +38,8 @@ def response_to_text(response: openai.openai_object.OpenAIObject) -> str:
     jpy_cost = usd_cost * usd_to_jpg
 
     text = response["choices"][0]["message"]["content"] + "\n"
-    # text += f"ちなみに、このテキストを作るのに{token_cost}トークン使用し、{jpy_cost}円かかりました。({usd_to_jpg}yen/usd換算)" + "\n"
+    cost_text = f"ちなみに、このテキストを作るのに{token_cost}トークン使用し、{jpy_cost}円かかりました。({usd_to_jpg}yen/usd換算)" + "\n"
+    # text += cost_text
+    cost_text
 
     return text

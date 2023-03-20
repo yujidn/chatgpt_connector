@@ -1,47 +1,57 @@
+import os
+
 import discord
 from discord.ext import commands
-import os
-from chatgpt_connector import connector
 
+from chatgpt_connector import connector
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='>', intents=intents)
+bot = commands.Bot(command_prefix=">", intents=intents)
+
 
 @bot.event
 async def on_ready():
-    print('Logged in as {0.user}'.format(bot))
+    print("Logged in as {0.user}".format(bot))
+
 
 @bot.command()
 async def ping(ctx):
-    await ctx.send('pong')
+    await ctx.send("pong")
+
 
 @bot.event
 async def on_message(message: discord.message.Message):
     if bot.user.mentioned_in(message):
         # メンションされた場合の処理
         message_list = []
-        message_list.append({'role': "system", 'content': "最新のメッセージ以外は会話の履歴です。roleがuserのものはユーザーが発したもので、roleがassistantのものは、chatgptからの返答になっています。会話履歴を踏まえたうえで、最新のメッセージに回答してください。"})
-        message_list.append({'role': "user", 'content': message.content})
+        message_list.append(
+            {
+                "role": "system",
+                "content": "最新のメッセージ以外は会話の履歴です。roleがuserのものはユーザーが発したもので、roleがassistantのものは、chatgptからの返答になっています。会話履歴を踏まえたうえで、最新のメッセージに回答してください。",
+            }
+        )
+        message_list.append({"role": "user", "content": message.content})
         async for msg in message.channel.history(limit=10, before=message):
             if msg.content:
                 # bot 以外のユーザーのメッセージのみリストに追加する
-                if 'chatgpt' in msg.author.name:
-                    message_list.append({'role': "assistant", 'content': msg.content})
+                if "chatgpt" in msg.author.name:
+                    message_list.append({"role": "assistant", "content": msg.content})
                 else:
-                    message_list.append({'role': "user", 'content': msg.content})
+                    message_list.append({"role": "user", "content": msg.content})
 
         reversed(message_list)
 
         import json
+
         print(json.dumps(message_list, indent=2, ensure_ascii=False))
         try:
             response = connector.send_messages(message_list)
             res_text = connector.response_to_text(response)
             print(res_text)
-            await message.channel.send(f'{message.author.mention} {res_text}')
+            await message.channel.send(f"{message.author.mention} {res_text}")
         except Exception as e:
-            await message.channel.send(f'{message.author.mention} 何かエラーが起きました。 {e}')
+            await message.channel.send(f"{message.author.mention} 何かエラーが起きました。 {e}")
 
 
-bot.run(os.getenv('DISCORD_TOKEN'))
+bot.run(os.getenv("DISCORD_TOKEN"))
