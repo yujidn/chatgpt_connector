@@ -24,31 +24,32 @@ async def ping(ctx):
 async def on_message(message: discord.message.Message):
     if bot.user.mentioned_in(message):
         # メンションされた場合の処理
-        message_list = []
-        message_list.append(
+        history_prompt = []
+        system_prompt = [
             {
                 "role": "system",
                 "content": "最新のメッセージ以外は会話の履歴です。roleがuserのものはユーザーが発したもので、roleがassistantのものは、chatgptからの返答になっています。会話履歴を踏まえたうえで、最新のメッセージに回答してください。",
             }
-        )
-        message_list.append({"role": "user", "content": message.content})
-        async for msg in message.channel.history(limit=10, before=message):
+        ]
+        history_prompt.append({"role": "user", "content": message.content})
+        async for msg in message.channel.history(limit=5, before=message):
             if msg.content:
                 # bot 以外のユーザーのメッセージのみリストに追加する
                 if "chatgpt" in msg.author.name:
-                    message_list.append({"role": "assistant", "content": msg.content})
+                    history_prompt.append({"role": "assistant", "content": msg.content})
                 else:
-                    message_list.append({"role": "user", "content": msg.content})
+                    history_prompt.append({"role": "user", "content": msg.content})
 
-        reversed(message_list)
+        history_prompt.reverse()
 
-        import json
+        message_list = system_prompt + history_prompt
+        # import json
+        # print(json.dumps(message_list, indent=2, ensure_ascii=False))
 
-        print(json.dumps(message_list, indent=2, ensure_ascii=False))
         try:
             response = connector.send_messages(message_list)
             res_text = connector.response_to_text(response)
-            print(res_text)
+            # print(res_text)
             await message.channel.send(f"{message.author.mention} {res_text}")
         except Exception as e:
             await message.channel.send(f"{message.author.mention} 何かエラーが起きました。 {e}")
