@@ -20,14 +20,30 @@ def send_text(text: str, model="gpt-3.5-turbo") -> openai.openai_object.OpenAIOb
 def send_messages(
     messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024
 ) -> openai.openai_object.OpenAIObject:
+    """list型のメッセージをopen ai apiに投げ込む.
+    messagesは
+    [
+    {
+        "role": "system" or "user" or "assistant",
+        "content": "text"
+    },
+    {
+        ...
+    }, ...
+    ]
+    のような並び.
+    "role"は、systemで恒久的なルールを、userでopenaiに聞いたtextを、assistantでoepnaiから返答をいれることで、会話の履歴を再現できる。
+
+    Args:
+        messages (typing.List[dict]): _description_
+        model (str, optional): _description_. Defaults to "gpt-3.5-turbo".
+        max_tokens (int, optional): _description_. Defaults to 1024.
+
+    Returns:
+        openai.openai_object.OpenAIObject: _description_
     """
-    {"role": <role>, "content": <text>},
-    """
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        max_tokens=max_tokens
-    )
+
+    response = openai.ChatCompletion.create(model=model, messages=messages, max_tokens=max_tokens)
 
     return response
 
