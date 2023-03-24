@@ -4,6 +4,10 @@
 npm install -g serverless
 sls
 ```
+
+対話でセットアップ
+
+```
 ? What do you want to make? AWS - Python - Starter
 ? What do you want to call this project? chatgpt-lambda
 
@@ -12,6 +16,9 @@ sls
 ? Do you want to login/register to Serverless Dashboard? No
 ```
 
+セットアップ後に `handler.py` と `serverless.yml` を書き換えてdeploy.
+
+```
 cd chatgpt-lambda
 sls plugin install -n serverless-python-requirements
 serverless deploy --aws-profile {your aws confidential profile name}
