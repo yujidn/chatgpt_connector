@@ -1,0 +1,4 @@
+slack-bolt
+python-lambda
+# openaiを追加するとなぜかsls deployに失敗するので、openaiはlambdaのlayerに手動で追加する
+# oepnai
