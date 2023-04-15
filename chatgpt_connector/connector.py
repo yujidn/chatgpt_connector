@@ -8,7 +8,7 @@ from .logger import get_logger
 
 url = "https://api.openai.com/v1/chat/completions"
 api_key = os.getenv("OPENAI_API_KEY")
-TIMEOUT = 5
+TIMEOUT = 30
 logger = get_logger()
 
 
@@ -58,15 +58,17 @@ def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tok
 
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
 
-    logger.debug(json.dumps(messages))
+    data = {"model": model, "messages": messages}
 
-    response = requests.post(url, headers=headers, json=messages, timeout=(TIMEOUT, TIMEOUT))
+    logger.debug(json.dumps(data, ensure_ascii=False))
+
+    response = requests.post(url, headers=headers, json=data, timeout=(TIMEOUT, TIMEOUT))
 
     logger.debug(f"status_code:{response.status_code}")
 
     if response.status_code == 200:
         result = response.json()
-        logger.debug(json.dumps(result))
+        logger.debug(json.dumps(result, ensure_ascii=False))
         return result
 
     else:
