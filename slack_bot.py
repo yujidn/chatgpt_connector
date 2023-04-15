@@ -1,4 +1,5 @@
 import os
+import re
 
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
@@ -6,6 +7,14 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from chatgpt_connector import connector
 
 app = App(token=os.getenv("SLACK_BOT_TOKEN"))
+bot_user_id = app.client.auth_test()["user_id"]
+
+
+def remove_mention(message: str) -> str:
+    m = re.match("<@.*>", message)
+    if m is not None:
+        return message[m.span()[1] :]
+    return message
 
 
 # スレッドを作成する関数
@@ -15,8 +24,6 @@ def reply_thread(channel_id, thread_ts, text):
 
 @app.event("app_mention")
 def handle_mention(event, say):
-    import json
-
     user_id = event["user"]
     channel_id = event["channel"]
 
@@ -27,25 +34,25 @@ def handle_mention(event, say):
     messages = response["messages"]
 
     # 指定されたユーザによるメッセージを取得する
-    user_messages = []
+    message_prompt = []
     for message in messages:
-        print(json.dumps(message, indent=2))
-        if message.get("user") == user_id:
-            user_messages.append(message)
+        if message.get("user") != bot_user_id:
+            message_prompt.append({"role": "user", "content": remove_mention(message["text"])})
+        else:
+            message_prompt.append({"role": "assistant", "content": remove_mention(message["text"])})
 
-    # メッセージをまとめる
-    thread_message = ""
-    for user_message in user_messages:
-        # メッセージの先頭にあるuser_idをskipする
-        text = user_message["text"][len(user_id) + 5 :]
-        thread_message += "{}\n".format(text)
+    system_prompt = [
+        {
+            "role": "system",
+            "content": "最新のメッセージ以外は会話の履歴です。roleがuserのものはユーザーが発したもので、roleがassistantのものは、chatgptからの返答になっています。会話履歴を踏まえたうえで、最新のメッセージに回答してください。",
+        }
+    ]
 
-    print(thread_message)
+    message_list = system_prompt + message_prompt
 
     try:
-        response = connector.send_text(thread_message)
+        response = connector.send_messages(message_list)
         response_text = connector.response_to_text(response)
-        print(response_text)
         # スレッドで返信する
         response_text = f"<@{user_id}> {response_text}"
         reply_thread(channel_id, thread_ts, response_text)

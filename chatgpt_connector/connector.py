@@ -14,11 +14,27 @@ logger = get_logger()
 
 def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024) -> dict:
     """
-    request:
-        message: {"role": <role>, "content": <text>},
+    list型のメッセージをopen ai apiに投げ込む.
+    messagesは
+    [
+    {
+        "role": "system" or "user" or "assistant",
+        "content": "text"
+    },
+    {
+        ...
+    }, ...
+    ]
+    のような並び.
+    "role"は、systemで恒久的なルールを、userでopenaiに聞いたtextを、assistantでoepnaiから返答をいれることで、会話の履歴を再現できる。
 
-    response:
-        ```
+    Args:
+        messages (typing.List[dict]): _description_
+        model (str, optional): _description_. Defaults to "gpt-3.5-turbo".
+        max_tokens (int, optional): _description_. Defaults to 1024.
+
+    Returns:
+        ```example
         {
             "id": "chatcmpl-123",
             "object": "chat.completion",
