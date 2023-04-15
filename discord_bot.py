@@ -32,6 +32,7 @@ async def ping(ctx):
 async def on_message(message: discord.message.Message):
     if bot.user.mentioned_in(message):
         # メンションされた場合の処理
+        await message.add_reaction("👍")
         history_prompt = []
         system_prompt = [
             {
@@ -54,7 +55,6 @@ async def on_message(message: discord.message.Message):
         message_list = system_prompt + history_prompt
         # import json
         # print(json.dumps(message_list, indent=2, ensure_ascii=False))
-        print("message received")
 
         try:
             response = connector.send_messages(message_list)
