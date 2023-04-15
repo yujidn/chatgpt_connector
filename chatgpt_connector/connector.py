@@ -17,13 +17,13 @@ def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tok
     list型のメッセージをopen ai apiに投げ込む.
     messagesは
     [
-    {
-        "role": "system" or "user" or "assistant",
-        "content": "text"
-    },
-    {
-        ...
-    }, ...
+        {
+            "role": "system" or "user" or "assistant",
+            "content": "text"
+        },
+        {
+            ...
+        }, ...
     ]
     のような並び.
     "role"は、systemで恒久的なルールを、userでopenaiに聞いたtextを、assistantでoepnaiから返答をいれることで、会話の履歴を再現できる。
@@ -34,7 +34,7 @@ def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tok
         max_tokens (int, optional): _description_. Defaults to 1024.
 
     Returns:
-        ```example
+        example
         {
             "id": "chatcmpl-123",
             "object": "chat.completion",
@@ -53,16 +53,14 @@ def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tok
                 "total_tokens": 21
             }
         }
-        ```
+
     """
 
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
 
-    data = {"model": model, "messages": [{"role": "user", "content": "Hello!"}]}
+    logger.debug(json.dumps(messages))
 
-    logger.debug(json.dumps(data))
-
-    response = requests.post(url, headers=headers, json=data, timeout=(TIMEOUT, TIMEOUT))
+    response = requests.post(url, headers=headers, json=messages, timeout=(TIMEOUT, TIMEOUT))
 
     logger.debug(f"status_code:{response.status_code}")
 

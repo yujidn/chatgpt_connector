@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -65,4 +66,4 @@ async def on_message(message: discord.message.Message):
             await message.channel.send(f"{message.author.mention} 何かエラーが起きました。 {e}")
 
 
-bot.run(os.getenv("DISCORD_TOKEN"), log_handler=logger.get_logger().handlers[0])
+bot.run(os.getenv("DISCORD_TOKEN"), log_handler=logger.get_logger().handlers[0], log_level=logging.DEBUG)
