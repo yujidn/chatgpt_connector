@@ -1,45 +1,73 @@
+import json
 import os
 import typing
 
-import openai
+import requests
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from .logger import get_logger
 
-
-def send_text(text: str, model="gpt-3.5-turbo") -> openai.openai_object.OpenAIObject:
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[
-            {"role": "user", "content": text},
-        ],
-    )
-
-    return response
+url = "https://api.openai.com/v1/chat/completions"
+api_key = os.getenv("OPENAI_API_KEY")
+TIMEOUT = 5
+logger = get_logger()
 
 
-def send_messages(
-    messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024
-) -> openai.openai_object.OpenAIObject:
+def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024) -> dict:
     """
-    {"role": <role>, "content": <text>},
+    request:
+        message: {"role": <role>, "content": <text>},
+
+    response:
+        ```
+        {
+            "id": "chatcmpl-123",
+            "object": "chat.completion",
+            "created": 1677652288,
+            "choices": [{
+                "index": 0,
+                "message": {
+                "role": "assistant",
+                "content": "\n\nHello there, how may I assist you today?",
+                },
+                "finish_reason": "stop"
+            }],
+            "usage": {
+                "prompt_tokens": 9,
+                "completion_tokens": 12,
+                "total_tokens": 21
+            }
+        }
+        ```
     """
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-    )
 
-    return response
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"}
+
+    data = {"model": model, "messages": [{"role": "user", "content": "Hello!"}]}
+
+    logger.debug(json.dumps(data))
+
+    response = requests.post(url, headers=headers, json=data, timeout=(TIMEOUT, TIMEOUT))
+
+    logger.debug(f"status_code:{response.status_code}")
+
+    if response.status_code == 200:
+        result = response.json()
+        logger.debug(json.dumps(result))
+        return result
+
+    else:
+        # https://platform.openai.com/docs/guides/error-codes
+        raise Exception(
+            f"request error_code:{response.status_code}\n detail -> https://platform.openai.com/docs/guides/error-codes"
+        )
 
 
-def response_to_text(response: openai.openai_object.OpenAIObject) -> str:
+def response_to_text(response: dict) -> str:
     usd_to_jpg = 140
-    token_cost = response["usage"]["total_tokens"]
     usd_cost = response["usage"]["total_tokens"] / 1000 * 0.002
     jpy_cost = usd_cost * usd_to_jpg
 
     text = response["choices"][0]["message"]["content"] + "\n"
-    # cost_text = f"ちなみに、このテキストを作るのに{token_cost}トークン使用し、{jpy_cost}円かかりました。({usd_to_jpg}yen/usd換算)" + "\n"
-    # text += cost_text
-    print(f"token:{token_cost} jpy:{jpy_cost}")
+    logger.info(json.dumps({**response["usage"], "jpy": jpy_cost}))
 
     return text
