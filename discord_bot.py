@@ -4,7 +4,7 @@ import re
 import discord
 from discord.ext import commands
 
-from chatgpt_connector import connector
+from chatgpt_connector import connector, logger
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -65,4 +65,4 @@ async def on_message(message: discord.message.Message):
             await message.channel.send(f"{message.author.mention} 何かエラーが起きました。 {e}")
 
 
-bot.run(os.getenv("DISCORD_TOKEN"))
+bot.run(os.getenv("DISCORD_TOKEN"), log_handler=logger.get_logger().handlers[0])
