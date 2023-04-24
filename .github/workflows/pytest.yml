@@ -43,5 +43,4 @@ jobs:
       # pytestを実行する -> カバレッジもあわせてみる
       - name: Test with pytest
         run: |
-          poetry run python -m pytest -v 
-
+          poetry run python -m pytest -v
