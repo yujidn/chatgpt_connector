@@ -1,0 +1,47 @@
+name: pytest
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+        poetry-version: ["1.4.0"]
+
+    steps:
+      # checkout repository
+      - name: checkout
+        uses: actions/checkout@v2
+
+      # install python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # poetry install
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ matrix.poetry-version }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      # vertural env cache
+      - name: Cache Poetry cache
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: poetry-cache-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.poetry-version }}-workflow-${{ hashFiles('**/.github/workflows/pytest.yml') }}-lock-${{ hashFiles('**/poetry.lock') }}
+
+      # cacheがヒットする場合はインストールをスキップする
+      - name: install dependencies
+        run: poetry install --no-interaction
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+
+      # pytestを実行する -> カバレッジもあわせてみる
+      - name: Test with pytest
+        run: |
+          poetry run python -m pytest -v 
+
