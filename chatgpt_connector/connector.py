@@ -12,7 +12,7 @@ TIMEOUT = 20
 logger = get_logger()
 
 
-def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo", max_tokens=1024) -> dict:
+def send_messages(messages: typing.List[dict], *, model="gpt-3.5-turbo-0613", max_tokens=1024) -> dict:
     """
     list型のメッセージをopen ai apiに投げ込む.
     messagesは
