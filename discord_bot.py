@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from chatgpt_connector import connector, logger
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=">", intents=intents)
