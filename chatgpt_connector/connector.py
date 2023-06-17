@@ -8,7 +8,7 @@ from .logger import get_logger
 
 url = "https://api.openai.com/v1/chat/completions"
 api_key = os.getenv("OPENAI_API_KEY")
-TIMEOUT = 20
+TIMEOUT = 120
 logger = get_logger()
 
 

@@ -42,7 +42,7 @@ async def on_message(message: discord.message.Message):
             }
         ]
         history_prompt.append({"role": "user", "content": remove_mention(message.content)})
-        async for msg in message.channel.history(limit=5, before=message):
+        async for msg in message.channel.history(limit=2, before=message):
             if msg.content:
                 # bot 以外のユーザーのメッセージのみリストに追加する
                 content = remove_mention(msg.content)
